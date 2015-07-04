@@ -69,6 +69,7 @@ after_bundle do
   inject_into_file 'config/application.rb', after: "# -- all .rb files in that directory are automatically loaded.\n" do <<-'RUBY'
     config.generators.template_engine = :slim
     config.generators.scaffold_controller = "i18n_scaffold_controller"
+    config.i18n.default_locale = "zh-CN"
   RUBY
   end
 
