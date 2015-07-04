@@ -1,5 +1,6 @@
 gsub_file "Gemfile", "https://rubygems.org", "http://ruby.taobao.org"
 
+gem 'mysql2'
 gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-rails'
 gem 'uglifier', '>= 1.3.0'
