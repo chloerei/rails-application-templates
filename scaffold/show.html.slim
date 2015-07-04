@@ -2,7 +2,7 @@ p#notice = notice
 
 <% attributes.each do |attribute| -%>
 p
-  strong = <%= human_name %>.human_attribute_name("<%= attribute.name %>") + ':'
+  strong = <%= class_name %>.human_attribute_name("<%= attribute.name %>") + ':'
   = @<%= singular_table_name %>.<%= attribute.name %>
 <% end -%>
 
