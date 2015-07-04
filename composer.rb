@@ -1,4 +1,4 @@
-add_source 'http://ruby.taobao.org'
+gsub_file "Gemfile", "https://rubygems.org", "http://ruby.taobao.org"
 
 gem 'coffee-rails', '~> 4.1.0'
 gem 'jquery-rails'
@@ -60,17 +60,31 @@ gem_group :test do
   gem 'ffaker'
 end
 
-if yes?("Would you like to install Devise?")
-  gem "devise"
-  generate "devise:install"
-  model_name = ask("What would you like the user model to be called? [user]")
-  model_name = "user" if model_name.blank?
-  generate "devise", model_name
-end
+gem "devise"
 
-generate "simple_form:install"
+
 
 after_bundle do
+  inject_into_file 'config/application.rb', after: "# -- all .rb files in that directory are automatically loaded.\n" do <<-'RUBY'
+    config.generators.template_engine = :slim
+  RUBY
+  end
+
+  generate "simple_form:install"
+  generate "devise:install"
+  generate "devise", "user"
+
+  run "mkdir lib/templates/rails/scaffold_controller/"
+
+
+
+  run "guard init"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/config/.gitignore -O .gitignore"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/_form.html.slim -O lib/templates/slim/scaffold/"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/edit.html.slim -O lib/templates/slim/scaffold/"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/index.html.slim -O lib/templates/slim/scaffold/"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/new.html.slim -O lib/templates/slim/scaffold/"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/show.html.slim -O lib/templates/slim/scaffold/"
   git :init
   git add: '.'
   git commit: "-a -m 'Initial commit'"
