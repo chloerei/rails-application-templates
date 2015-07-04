@@ -75,28 +75,49 @@ after_bundle do
   RUBY
   end
 
-  generate "simple_form:install"
+  generate "simple_form:install --bootstrap"
   generate "devise:install"
   generate "devise", "user"
+  generate "settings", "setting"
+  generate "rails_settings_ui:install"
 
-  route "mount RailsSettingsUi::Engine, at: 'settings'"
 
   rake "db:migrate"
 
-  run "mkdir -p lib/templates/rails/scaffold_controller/"
   run "mkdir -p lib/templates/slim/scaffold/"
+  run "mkdir -p lib/generators/rails/i18n_scaffold_controller/templates/"
 
 
-
+  #init guard config
   run "guard init"
+
+  #fetch default .gitignore
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/config/.gitignore -O .gitignore"
+
+  #config rails_settings_ui
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/initializers/rails_settings_ui.rb -O config/initializers/rails_settings_ui.rb"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/models/setting.rb -O app/models/setting.rb"
+
+  #custom scaffold slim template to support i18n auto
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/_form.html.slim -O lib/templates/slim/scaffold/_form.html.slim"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/edit.html.slim -O lib/templates/slim/scaffold/edit.html.slim"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/index.html.slim -O lib/templates/slim/scaffold/index.html.slim"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/new.html.slim -O lib/templates/slim/scaffold/new.html.slim"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/show.html.slim -O lib/templates/slim/scaffold/show.html.slim"
+
+  #custom scaffold controller template to support i18n auto
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/i18n_scaffold_controller/controller.rb -O lib/generators/rails/i18n_scaffold_controller/templates/controller.rb"
+
+
+  #define new scaffold controller to auto generate i18n in config/local/zh-CN.yml
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/i18n_scaffold_controller/i18n_scaffold_controller_generator.rb -O lib/generators/rails/i18n_scaffold_controller/i18n_scaffold_controller_generator.rb"
+
+  #default zh-CN file
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/config/locales/zh-CN.yml -O config/locales/zh-CN.yml"
+
+  #suppport sms, use china_sms
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/lib/sms.rb -O lib/sms.rb"
+
   git :init
   git add: '.'
   git commit: "-a -m 'Initial commit'"

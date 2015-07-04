@@ -1,0 +1,3 @@
+SMS_PROVIDER: tui3
+SMS_API_KEY: sms_api_key
+SEND_REAL_SMS: true
