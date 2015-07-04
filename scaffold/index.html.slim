@@ -1,6 +1,6 @@
 h1 = <%= human_name %>.model_name.human
 
-table
+table.table-striped.applies-summary
   tr
 <% attributes.each do |attribute| -%>
     th = <%= human_name %>.human_attribute_name("<%= attribute.name %>")

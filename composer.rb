@@ -70,21 +70,33 @@ after_bundle do
   RUBY
   end
 
+  inject_into_file 'config/environments/development.rb', after: "# -- all .rb files in that directory are automatically loaded.\n" do <<-'RUBY'
+    config.action_mailer.default_url_options = { host: 'localhost', port: 3000 }
+  RUBY
+  end
+
   generate "simple_form:install"
   generate "devise:install"
   generate "devise", "user"
 
-  run "mkdir lib/templates/rails/scaffold_controller/"
+  route "mount RailsSettingsUi::Engine, at: 'settings'"
+
+  rake "db:migrate"
+
+  run "mkdir -p lib/templates/rails/scaffold_controller/"
+  run "mkdir -p lib/templates/slim/scaffold/"
 
 
 
   run "guard init"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/config/.gitignore -O .gitignore"
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/_form.html.slim -O lib/templates/slim/scaffold/"
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/edit.html.slim -O lib/templates/slim/scaffold/"
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/index.html.slim -O lib/templates/slim/scaffold/"
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/new.html.slim -O lib/templates/slim/scaffold/"
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/show.html.slim -O lib/templates/slim/scaffold/"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/initializers/rails_settings_ui.rb -O config/initializers/rails_settings_ui.rb"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/models/setting.rb -O app/models/setting.rb"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/_form.html.slim -O lib/templates/slim/scaffold/_form.html.slim"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/edit.html.slim -O lib/templates/slim/scaffold/edit.html.slim"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/index.html.slim -O lib/templates/slim/scaffold/index.html.slim"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/new.html.slim -O lib/templates/slim/scaffold/new.html.slim"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/show.html.slim -O lib/templates/slim/scaffold/show.html.slim"
   git :init
   git add: '.'
   git commit: "-a -m 'Initial commit'"
