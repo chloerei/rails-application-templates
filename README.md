@@ -1,1 +1,1 @@
-# rails-application-templates
+## 简介

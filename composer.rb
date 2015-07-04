@@ -67,6 +67,7 @@ gem "devise"
 after_bundle do
   inject_into_file 'config/application.rb', after: "# -- all .rb files in that directory are automatically loaded.\n" do <<-'RUBY'
     config.generators.template_engine = :slim
+    config.generators.scaffold_controller = "i18n_scaffold_controller"
   RUBY
   end
 
@@ -85,6 +86,7 @@ after_bundle do
   rake "db:migrate"
 
   run "mkdir -p lib/templates/slim/scaffold/"
+  run "mkdir -p lib/templates/rails/i18n_scaffold_controller"
   run "mkdir -p lib/generators/rails/i18n_scaffold_controller/templates/"
 
 
@@ -106,7 +108,7 @@ after_bundle do
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/scaffold/show.html.slim -O lib/templates/slim/scaffold/show.html.slim"
 
   #custom scaffold controller template to support i18n auto
-  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/i18n_scaffold_controller/controller.rb -O lib/generators/rails/i18n_scaffold_controller/templates/controller.rb"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/i18n_scaffold_controller/controller.rb -O lib/templates/rails/i18n_scaffold_controller/controller.rb"
 
 
   #define new scaffold controller to auto generate i18n in config/local/zh-CN.yml
