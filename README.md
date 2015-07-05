@@ -6,6 +6,33 @@
 2. cd myapp; rails g scaffold post title:string
 
 ## [应用模板](composer.rb) 做了些什么
+### 自动将项目文件加入git版本控制，并支持创建到github上
+### 支持mina部署
+需要提前保证本地机器，能ssh无密码直接登陆到服务器上
+1. 根据提示输入用户名，host名，目录名，改变config/deploy.rb
+```ruby
+  username = ask("input your user name on deploy host:")
+  File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
+
+  domain = ask("input your deploy host, like example.com or 123.100.100.100:")
+  gsub_file "config/deploy.rb", "'foobar.com'", "'" + domain + "'"
+
+  directory = ask("input your deploy directory:")
+  directory = directory.gsub(/\/$/, "")
+  gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
+```
+2. 自动在服务器上创建相应目录，以及修改权限
+```ruby
+  setup_dir_command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
+  run setup_dir_command
+```
+3. 将config/database.yml，自动上传到部署服务器上
+```ruby
+scp_file_command = 'scp config/database.yml ' + username + '@' + domain + ':' + directory + '/shared/config/'
+run scp_file_command
+```
+4. 执行完后，mina ssh, mina console, mina deploy测试正常
+
 ### i18n支持， 创建I18nScaffoldControllerGenerator
 1. 默认使用I18nScaffoldControllerGenerator, config/application.rb中
 ```ruby
