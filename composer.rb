@@ -1,4 +1,3 @@
-gsub_file "Gemfile", "https://rubygems.org", "http://ruby.taobao.org"
 
 gem 'mysql2'
 gem 'coffee-rails', '~> 4.1.0'
@@ -86,6 +85,7 @@ after_bundle do
   generate "devise:install"
   generate "devise", "user"
 
+  gsub_file "config/initializers/devise.rb", "# config.secret_key =", "config.secret_key ="
   rake "db:migrate"
 
   run "mkdir -p lib/templates/slim/scaffold/"
@@ -129,40 +129,45 @@ after_bundle do
   File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
 
   domain = ask("input your deploy host, like example.com or 123.100.100.100:")
-  gsub_file "config/deploy.rb", "foobar.com", domain
+  gsub_file "config/deploy.rb", "'foobar.com'", "'" + domain + "'"
 
   directory = ask("input your deploy directory:")
+  directory = directory.gsub(/\/$/, "")
   gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
+
+
+  git :init
+  git add: '.'
+  git commit: "-a -m 'Initial commit'"
 
 
   #config github repo
   if yes?("Create a GitHub repository? (y/n)")
-    add_gem 'hub', :require => nil, :group => [:development]
-    puts app_name
+    run 'gem install hub'
     run "hub create #{app_name}"
     run "hub push -u origin master"
     #update deploy.rb repo
-    repository = run "hub remote -v | awk '{ print $2}' | head -n1"
-    puts repository
+    result = `hub remote -v | awk '{ print $2}' | head -n1`
+    repository = result.strip
     gsub_file "config/deploy.rb", "git://...", repository
   else
     #if github repo didn't create, then choose your own
     repository = ask("input your project's repo")
     gsub_file "config/deploy.rb", "git://...", repository
   end
+  #File.open('config/deploy.rb', 'a') { |f| f.write('\ndesc "Shows logs."\ntask :logs do\n  queue %[cd #{deploy_to!}/current && tail -f log/production.log]\nend')}
 
 
-  command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
-  puts command
-  run command
-
-
+  setup_dir_command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
+  run setup_dir_command
   run 'mina setup'
+
+  scp_file_command = 'scp config/database.yml ' + username + '@' + domain + ':' + directory + '/shared/config/'
+  run scp_file_command
   run 'mina deploy'
 
-
-
-  git :init
   git add: '.'
-  git commit: "-a -m 'Initial commit'"
+  git commit: "-a -m 'update mina config/deploy.rb'"
+
+
 end
