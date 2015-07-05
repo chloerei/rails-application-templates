@@ -1,5 +1,5 @@
 ## 简介
-最近的项目中，频繁使用到I18n，以及新建rails项目时，总是重复操作，如使用devise, simple_form, guard，以及配置一些gem.所以写了一个rails application template, 避免这类的重复事情
+最近的项目中，频繁使用到I18n，以及新建rails项目时，总是重复操作，如使用mina部署，devise, simple_form, guard，以及配置一些gem.所以写了一个rails application template, 避免这类的重复事情
 
 ## 如何使用
 1. rails new myapp -m https://raw.githubusercontent.com/seaify/rails-application-templates/master/composer.rb
@@ -12,11 +12,9 @@
 1. 根据提示输入用户名，host名，目录名，改变config/deploy.rb
 ```ruby
   username = ask("input your user name on deploy host:")
-  File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
-
+  File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}'\n")}
   domain = ask("input your deploy host, like example.com or 123.100.100.100:")
   gsub_file "config/deploy.rb", "'foobar.com'", "'" + domain + "'"
-
   directory = ask("input your deploy directory:")
   directory = directory.gsub(/\/$/, "")
   gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
@@ -100,11 +98,13 @@ zh-CN:
 ```
 
 ### 其他
-1. gemfile中，使用taobao源
+1. gemfile中，source未改变，本来改成了taobao源，后来加入mina部署到digitalocean后，发现直接暴力的改gem source源为taobao是不合适的。在本地，就执行bundle config 'mirror.https://rubygems.org' 'https://ruby.taobao.org' 吧
 2. 配置了guard, guard-bundler, guard-migrate, guard-annotate这些gem
 3. 配置了rails-settings-ui, 访问http://localhost:3000/settings页面，就能更新定义好的设置
 4. 配置了devise, 访问http://localhost:3000/users/sign_in
+5. scaffold生成的页面，采用bootstrap的样式
 
 ### 参考
 [railsGuides i18n](http://guides.rubyonrails.org/i18n.html)
 [scaffold_cn, generate zh_CN templates for scaffold in ruby on rails](https://github.com/homeway/scaffold_cn)
+[无需更改 Gemfile，让 bundle 使用淘宝源](https://ruby-china.org/topics/26314)
