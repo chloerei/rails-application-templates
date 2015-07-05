@@ -135,6 +135,9 @@ after_bundle do
   directory = directory.gsub(/\/$/, "")
   gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
 
+  File.open('app/assets/javascripts/application.js', 'a') { |f| f.write("\n//= require bootstrap-sprockets")}
+  run "rm app/assets/stylesheets/application.scss"
+  run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/assets/application.scss -O app/assets/stylesheets/application.scss"
 
   git :init
   git add: '.'
