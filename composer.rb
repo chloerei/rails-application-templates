@@ -95,6 +95,7 @@ after_bundle do
 
   #init guard config
   run "guard init"
+  run "mina init"
 
   #fetch default .gitignore
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/config/.gitignore -O .gitignore"
@@ -122,6 +123,44 @@ after_bundle do
 
   #suppport sms, use china_sms
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/lib/sms.rb -O lib/sms.rb"
+
+  #deploy mina
+  username = ask("input your user name on deploy host:")
+  File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
+
+  domain = ask("input your deploy host, like example.com or 123.100.100.100:")
+  gsub_file "config/deploy.rb", "foobar.com", domain
+
+  directory = ask("input your deploy directory:")
+  gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
+
+
+  #config github repo
+  if yes?("Create a GitHub repository? (y/n)")
+    add_gem 'hub', :require => nil, :group => [:development]
+    puts app_name
+    run "hub create #{app_name}"
+    run "hub push -u origin master"
+    #update deploy.rb repo
+    repository = run "hub remote -v | awk '{ print $2}' | head -n1"
+    puts repository
+    gsub_file "config/deploy.rb", "git://...", repository
+  else
+    #if github repo didn't create, then choose your own
+    repository = ask("input your project's repo")
+    gsub_file "config/deploy.rb", "git://...", repository
+  end
+
+
+  command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
+  puts command
+  run command
+
+
+  run 'mina setup'
+  run 'mina deploy'
+
+
 
   git :init
   git add: '.'
