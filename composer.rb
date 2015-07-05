@@ -78,12 +78,13 @@ after_bundle do
   RUBY
   end
 
+  generate "settings", "setting"
+  generate "rails_settings_ui:install"
+  rake "db:migrate"
+
   generate "simple_form:install --bootstrap"
   generate "devise:install"
   generate "devise", "user"
-  generate "settings", "setting"
-  generate "rails_settings_ui:install"
-
 
   rake "db:migrate"
 
