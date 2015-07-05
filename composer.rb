@@ -124,25 +124,32 @@ after_bundle do
   #suppport sms, use china_sms
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/lib/sms.rb -O lib/sms.rb"
 
-  #deploy mina
-  username = ask("input your user name on deploy host:")
-  File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
-
-  domain = ask("input your deploy host, like example.com or 123.100.100.100:")
-  gsub_file "config/deploy.rb", "'foobar.com'", "'" + domain + "'"
-
-  directory = ask("input your deploy directory:")
-  directory = directory.gsub(/\/$/, "")
-  gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
-
+  #config bootstrap stylesheets
   File.open('app/assets/javascripts/application.js', 'a') { |f| f.write("\n//= require bootstrap-sprockets")}
-  run "rm app/assets/stylesheets/application.scss"
+  run "rm app/assets/stylesheets/application.css"
   run "wget https://raw.githubusercontent.com/seaify/rails-application-templates/master/assets/application.scss -O app/assets/stylesheets/application.scss"
 
+  #deploy mina
+  enable_mina = false
+  if yes?("Create mina deploy? (y/n)")
+    enable_mina = true
+    username = ask("input your user name on deploy host:")
+    File.open('config/deploy.rb', 'a') { |f| f.write("\nset :user, '#{username}' ")}
+    domain = ask("input your deploy host, like example.com or 123.100.100.100:")
+    gsub_file "config/deploy.rb", "'foobar.com'", "'" + domain + "'"
+    directory = ask("input your deploy directory:")
+    directory = directory.gsub(/\/$/, "")
+    gsub_file "config/deploy.rb", "/var/www/foobar.com", directory
+
+    setup_dir_command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
+    run setup_dir_command
+    run 'mina setup'
+  end
+
+  #init git, prepare for setup github
   git :init
   git add: '.'
   git commit: "-a -m 'Initial commit'"
-
 
   #config github repo
   if yes?("Create a GitHub repository? (y/n)")
@@ -158,17 +165,15 @@ after_bundle do
     repository = ask("input your project's repo")
     gsub_file "config/deploy.rb", "git://...", repository
   end
-  #File.open('config/deploy.rb', 'a') { |f| f.write('\ndesc "Shows logs."\ntask :logs do\n  queue %[cd #{deploy_to!}/current && tail -f log/production.log]\nend')}
 
+  #do the first time mina deploy
+  if enable_mina
+    scp_file_command = 'scp config/database.yml ' + username + '@' + domain + ':' + directory + '/shared/config/'
+    run scp_file_command
+    run 'mina deploy'
+  end
 
-  setup_dir_command = 'ssh ' + username + '@' + domain + " -t 'mkdir -p " + directory  + ';chown -R ' + username + ' ' + directory + "'"
-  run setup_dir_command
-  run 'mina setup'
-
-  scp_file_command = 'scp config/database.yml ' + username + '@' + domain + ':' + directory + '/shared/config/'
-  run scp_file_command
-  run 'mina deploy'
-
+  #git commit update deploy.rb
   git add: '.'
   git commit: "-a -m 'update mina config/deploy.rb'"
 
